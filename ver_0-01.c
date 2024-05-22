@@ -6,15 +6,23 @@
 void calc(double a, double b, char c){     //function to perform the artihmetic calculations
     double z=0;
     if(c == '+'){
-        z=a+b;
+        printf("%lf",a+b);
     }else if (c == '-'){
-        z=a-b;
+        printf("%lf",a-b);
     }else if (c == '*'){
-        z=a*b;
-    }else {                                //end case is division cause i have already added a filtration process in the main
-        z=a/b;
+        printf("%lf",a*b);
+    }else if (c == '/')
+    {
+        if (b!=0)
+        {
+            printf("%lf",a/b);
+        }else{
+            printf("Denominator cannot be zero");                       //error message for invalid denominator
+        }
+        
+    }else{
+        printf("Invalid symbol or the operation is not supported");      //error message 
     }
-    printf("The answer is %lf",z);
 }
 
 int main(int argc, char const *argv[])
@@ -23,14 +31,7 @@ int main(int argc, char const *argv[])
     char cc;
     printf("This is my first calculator program which is only capable of addition, subtraction, muultiplication and division\n");
     scanf("%lf\n%c%lf",&aa,&cc,&bb);    //taking in the input
-    if (cc== '+' || cc== '-' || cc== '*' || cc=='/'){         //filteration process to check operatior symbol
-
-        calc(aa,bb,cc);                 //calling the function
-
-    }else{
-        printf("Invalid symbol or the operation is not supported");      //error message
-    }
-
+    calc(aa,bb,cc);
     return 0;
 }
 
