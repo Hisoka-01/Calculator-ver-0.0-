@@ -3,7 +3,7 @@
 
 #include<stdio.h>
 
-void calc(double a, double b, char c){     //function to perform the artihmetic calculations
+void calculate(double a, double b, char c){     //function to perform the artihmetic calculations
     double z=0;
     if(c == '+'){
         printf("%lf",a+b);
@@ -29,9 +29,9 @@ int main(int argc, char const *argv[])
 {
     double aa,bb;                       // variable decleration
     char cc;
-    printf("This is my first calculator program which is only capable of addition, subtraction, muultiplication and division\n");
+    printf("This is my first calculator program which is only capable of addition, subtraction, multiplication and division\n");
     scanf("%lf\n%c%lf",&aa,&cc,&bb);    //taking in the input
-    calc(aa,bb,cc);
+    calculate(aa,bb,cc);
     return 0;
 }
 
