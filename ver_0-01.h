@@ -11,6 +11,13 @@ void calculate(double a, double b, char c){     //function to perform the artihm
         printf("%lf",a-b);
     }else if (c == '*'){
         printf("%lf",a*b);
+    }else if (c == '%'){
+        if (b!=0)
+        {
+            printf("%lf",a/b);
+        }else{
+            printf("Denominator cannot be zero");                       //error message for invalid denominator
+        }
     }else if (c == '/')
     {
         if (b!=0)
@@ -25,15 +32,6 @@ void calculate(double a, double b, char c){     //function to perform the artihm
     }
 }
 
-int main(int argc, char const *argv[])
-{
-    double aa,bb;                       // variable decleration
-    char cc;
-    printf("This is my first calculator program which is only capable of addition, subtraction, multiplication and division\n");
-    scanf("%lf\n%c%lf",&aa,&cc,&bb);    //taking in the input
-    calculate(aa,bb,cc);
-    return 0;
-}
 
 /* In the next version wil try to take the input in single line instead of using multiple lines to lay the
  foundation for taking equatins as input*/
