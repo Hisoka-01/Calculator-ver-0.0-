@@ -1,146 +1,154 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
-#include "parenthesis.h"
-#include "infixToPostfix.h"
-#include "ver_0-01.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
-// add comments
+#define MAX 100
 
-struct Node          //Stack defination
-{
-    char data;
-    struct Node* next;
-};
+// Function prototypes
+int precedence(char op);
+double apply_op(double a, double b, char op);
+double evaluate(char* expr);
+int bracketscheck(char* exprsn);
+void process_expression(char* exprsn, double* values, char* signs, int* valueCount, int* signCount);
 
-struct stack
-{
-    int top;
-    int size;
-    char* arr;
-};
+// Function to check matching brackets
+int bracketscheck(char *expr) {
+    char stack[MAX];
+    int top = -1;
 
-
-int filtration(char* exprsn, double* vv, char* ss){       //fucntion to seperate values and signs in to two diff arrays
-    char* num=(char*)calloc(12,sizeof(char));             //made an array to turn strings into integers 
-    char* err_ptr;                                        //pointer for strod function
-    int i=0,k=0;                                          //counter for length of number string and length of the array of values
-    while (*exprsn !='\0')
-    {
-        if (*exprsn=='+' || *exprsn=='-' || *exprsn=='*' || *exprsn=='/' || *exprsn=='%' )
-        {
-            *ss=*exprsn;                                   //taking in the sign
-            if(i!=0){                                      //chekcing if there is any number in string
-            *vv=strtod(num,&err_ptr);                      //converting the string into integer
-            i=0;
-            free(num);                                     // frred the dynamic memory
-            char* num=(char*)calloc(12,sizeof(char));      //using dynamic memory allocation
-            vv++;
-            k++;
+    for (int i = 0; expr[i] != '\0'; i++) {
+        if (expr[i] == '(' || expr[i] == '[' || expr[i] == '{') {
+            stack[++top] = expr[i];  // Push opening brackets
+        } else if (expr[i] == ')' || expr[i] == ']' || expr[i] == '}') {
+            if (top == -1) {
+                return 0;  // Unmatched closing bracket
             }
-            ss++;
-            exprsn++;
-        }else if (*exprsn>=48 && *exprsn<=57 || *exprsn=='.')
-        {
-            num[i]=*exprsn;                                //taking the characters of the integers in a string to turn it into an integer
-            exprsn++;
-            i++;
-        }else if ( *exprsn==' ' &&  i!=0)                 //checking for space in between the numbers or signs
-        {
-            *vv=strtod(num,&err_ptr);
-            i=0;
-            free(num);
-            char* num=(char*)calloc(12,sizeof(char));
-            vv++;
-            k++;
-            
-        }else 
-        {
-            if ( *exprsn!=' ')
-            {
-                printf("\nUnknown character detected\n");
+            char last = stack[top--];  // Pop from stack
+            if ((expr[i] == ')' && last != '(') ||
+                (expr[i] == ']' && last != '[') ||
+                (expr[i] == '}' && last != '{')) {
+                return 0;  // Mismatched brackets
             }
-            exprsn++;
         }
     }
-    exprsn--;
-    if (*exprsn>=48 && *exprsn<=57 )                       //checking if a number is left in the string
-    {
-        *vv=strtod(num,&err_ptr);
-        k++;
-    }
-    free(num);                                             //freed the dynamic memory
-    return k;
+    return (top == -1);  // If stack is empty, brackets matched
 }
 
-int simplify(double* values, char* postfix){
-
-    
-
+// Function to check operator precedence
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    if (op == '%') return 3;
+    return 0;
 }
 
-
-int main(int argc, char const *argv[])
-{
-    char input[200]="";                                   //variable decleration
-    double* values = (int*)calloc(50, sizeof(int));                                    //integer array to hold the values
-    char* sign = (char*)calloc(50,sizeof(char));          //character array to hold the signs
-
-    struct stack* pit=(struct stack*)calloc(1,sizeof(struct stack*));    //stack to check the brackets
-    pit->top = -1;
-    pit->size = 20;
-    pit->arr = (char*)calloc(pit->size,sizeof(char));
-
-    struct Node top;                                     // stack to convert infix to postfix
-    top.data = '\0';
-    top.next=NULL;
-
-    scanf("%[^\n]%*c",&input);                            //accepting input from the user
-
-    int len=filtration(input,values,sign);              // using filteration function to seperate the values and signs and also find the length of values array
-    int count = strlen(sign);
-    
-    if ()
-    {
-        /* code */
+// Function to apply an operator to two operands
+double apply_op(double a, double b, char op) {
+    switch (op) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/':
+            if (b != 0) return a / b; 
+            else {
+                printf("Error: Division by zero\n");
+                return 0;
+            }
+        case '%':
+            if ((int)b != 0) return (int)a % (int)b;
+            else {
+                printf("Error: Modulus by zero\n");
+                return 0;
+            }
+        default: return 0;
     }
-    
-    //Checking if the given expression is valid
+}
 
-    if ( bracektsCheck(input, pit) )
-    {
-        //freed the memory
-        free(pit->arr);
-        free(pit);
-        
-    
-        char* postfix = (char*)calloc(count+1, sizeof(char));
-        converter(sign, postfix, &top);
+// Function to process the expression
+void process_expression(char* exprsn, double* values, char* signs, int* valueCount, int* signCount) {
+    char num[20];
+    int i = 0, j = 0;
+    int negative_flag = 0;  // To detect negative numbers
 
-        free(sign);                                     //freed the old array consisting the signs
-
+    while (*exprsn != '\0') {
+        if (isdigit(*exprsn) || *exprsn == '-') {
+            if (*exprsn == '-' && (i == 0 || signs[j - 1] == '(' || signs[j - 1] == '[' || signs[j - 1] == '{')) {
+                negative_flag = 1; // Mark negative number
+                exprsn++;
+                continue;
+            }
+            // Read the number
+            while (isdigit(*exprsn) || *exprsn == '.') {
+                num[i++] = *exprsn;
+                exprsn++;
+            }
+            num[i] = '\0'; // Null terminate the string
+            values[*valueCount] = negative_flag ? -atof(num) : atof(num); // Convert to double
+            (*valueCount)++;
+            negative_flag = 0; // Reset flag
+            i = 0; // Reset num index
+        } else if (*exprsn == '+' || *exprsn == '-' || *exprsn == '*' || *exprsn == '/' || *exprsn == '%') {
+            while (j > 0 && precedence(signs[j - 1]) >= precedence(*exprsn)) {
+                double val2 = values[--(*valueCount)];
+                double val1 = values[--(*valueCount)];
+                char op = signs[--j];
+                values[*valueCount] = apply_op(val1, val2, op); // Apply the operator
+                (*valueCount)++;
+            }
+            signs[j++] = *exprsn; // Push operator onto stack
+            exprsn++;
+        } else if (*exprsn == '(' || *exprsn == '[' || *exprsn == '{') {
+            signs[j++] = *exprsn; // Push bracket onto stack
+            exprsn++;
+        } else if (*exprsn == ')' || *exprsn == ']' || *exprsn == '}') {
+            while (j > 0 && signs[j - 1] != '(' && signs[j - 1] != '[' && signs[j - 1] != '{') {
+                double val2 = values[--(*valueCount)];
+                double val1 = values[--(*valueCount)];
+                char op = signs[--j];
+                values[*valueCount] = apply_op(val1, val2, op); // Apply the operator
+                (*valueCount)++;
+            }
+            j--; // Pop the opening bracket
+            exprsn++;
+        } else {
+            exprsn++; // Ignore spaces and unrecognized characters
+        }
     }
-    else
-    {
-        printf("Brackets didn't match \n");
+
+    while (j > 0) { // Apply remaining operators
+        double val2 = values[--(*valueCount)];
+        double val1 = values[--(*valueCount)];
+        char op = signs[--j];
+        values[*valueCount] = apply_op(val1, val2, op); // Apply the operator
+        (*valueCount)++;
+    }
+}
+
+// Function to evaluate the expression
+double evaluate(char* expr) {
+    double values[MAX];
+    char signs[MAX];
+    int valueCount = 0, signCount = 0;
+
+    if (!bracketscheck(expr)) {
+        printf("Error: Brackets do not match.\n");
+        return 0;
     }
 
-  
-    /* testing if function is taking value properly or not
-    for(int i=0;i<len;i++){
-        printf("%f ",values[i]);
-    }
-    printf("\n Above are the values given and sign length is %d\n",strlen(sign));
-        for(int i=0; i<strlen(sign); i++){
-        printf("%c ",sign[i]);
-    }
-    printf("\n Above are the signs given");
-    */
+    process_expression(expr, values, signs, &valueCount, &signCount);
+    return values[0];  // The result will be in the first element
+}
 
+// Main function to handle user input and process expression
+int main() {
+    char expression[MAX];
 
-    //main operation
+    printf("Enter the expression: ");
+    fgets(expression, sizeof(expression), stdin);
 
-
+    double result = evaluate(expression);
+    printf("The result of the expression is: %.2lf\n", result);
 
     return 0;
 }
